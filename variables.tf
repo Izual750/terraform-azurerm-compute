@@ -85,12 +85,6 @@ variable "vm_os_simple" {
   default     = ""
 }
 
-variable "vm_os_id" {
-  description = "The resource ID of the image that you want to deploy if you are using a custom image.Note, need to provide is_windows_image = true for windows custom images."
-  type        = string
-  default     = ""
-}
-
 variable "is_windows_image" {
   description = "Boolean flag to notify when the custom image is windows based."
   type        = bool

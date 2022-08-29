@@ -29,6 +29,14 @@ resource "azurerm_storage_account" "vm-sa" {
   tags                     = var.tags
 }
 
+data "azurerm_platform_image" "osimage" {
+  location  = coalesce(var.location, data.azurerm_resource_group.vm.location)
+  publisher = coalesce(var.vm_os_publisher, module.os.calculated_value_os_publisher)
+  offer     = coalesce(var.vm_os_offer, module.os.calculated_value_os_offer)
+  sku       = coalesce(var.vm_os_sku, module.os.calculated_value_os_sku)
+  version   = var.vm_os_version
+}
+
 resource "azurerm_virtual_machine" "vm-linux" {
   count                            = !contains(tolist([var.vm_os_simple, var.vm_os_offer]), "WindowsServer") && !var.is_windows_image ? var.nb_instances : 0
   name                             = var.vm_hostname
@@ -52,14 +60,6 @@ resource "azurerm_virtual_machine" "vm-linux" {
       type         = var.identity_type
       identity_ids = length(var.identity_ids) > 0 ? var.identity_ids : []
     }
-  }
-
-  storage_image_reference {
-    id        = var.vm_os_id
-    publisher = var.vm_os_id == "" ? coalesce(var.vm_os_publisher, module.os.calculated_value_os_publisher) : ""
-    offer     = var.vm_os_id == "" ? coalesce(var.vm_os_offer, module.os.calculated_value_os_offer) : ""
-    sku       = var.vm_os_id == "" ? coalesce(var.vm_os_sku, module.os.calculated_value_os_sku) : ""
-    version   = var.vm_os_id == "" ? var.vm_os_version : ""
   }
 
   storage_os_disk {
@@ -135,14 +135,6 @@ resource "azurerm_virtual_machine" "vm-linux" {
     enabled     = var.boot_diagnostics
     storage_uri = var.boot_diagnostics ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : ""
   }
-}
-
-data "azurerm_platform_image" "osimage" {
-  location  = coalesce(var.location, data.azurerm_resource_group.vm.location)
-  publisher = var.vm_os_id == "" ? coalesce(var.vm_os_publisher, module.os.calculated_value_os_publisher) : ""
-  offer     = var.vm_os_id == "" ? coalesce(var.vm_os_offer, module.os.calculated_value_os_offer) : ""
-  sku       = var.vm_os_id == "" ? coalesce(var.vm_os_sku, module.os.calculated_value_os_sku) : ""
-  version   = var.vm_os_id == "" ? var.vm_os_version : ""
 }
 
 resource "azurerm_managed_disk" "os-disk" {
