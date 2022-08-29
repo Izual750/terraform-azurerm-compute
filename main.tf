@@ -137,10 +137,19 @@ resource "azurerm_virtual_machine" "vm-linux" {
   }
 }
 
+data "azurerm_platform_image" "osimage" {
+  location  = coalesce(var.location, data.azurerm_resource_group.vm.location)
+  publisher = var.vm_os_id == "" ? coalesce(var.vm_os_publisher, module.os.calculated_value_os_publisher) : ""
+  offer     = var.vm_os_id == "" ? coalesce(var.vm_os_offer, module.os.calculated_value_os_offer) : ""
+  sku       = var.vm_os_id == "" ? coalesce(var.vm_os_sku, module.os.calculated_value_os_sku) : ""
+  version   = var.vm_os_id == "" ? var.vm_os_version : ""
+}
+
 resource "azurerm_managed_disk" "os-disk" {
   location             = coalesce(var.location, data.azurerm_resource_group.vm.location)
   resource_group_name  = data.azurerm_resource_group.vm.name
   name                 = "${var.vm_hostname}-osdisk"
+  image_reference_id   = data.azurerm_platform_image.osimage.id
   create_option        = "FromImage"
   storage_account_type = var.storage_account_type
 }
@@ -169,13 +178,6 @@ resource "azurerm_virtual_machine" "vm-windows" {
     }
   }
 
-  storage_image_reference {
-    id        = var.vm_os_id
-    publisher = var.vm_os_id == "" ? coalesce(var.vm_os_publisher, module.os.calculated_value_os_publisher) : ""
-    offer     = var.vm_os_id == "" ? coalesce(var.vm_os_offer, module.os.calculated_value_os_offer) : ""
-    sku       = var.vm_os_id == "" ? coalesce(var.vm_os_sku, module.os.calculated_value_os_sku) : ""
-    version   = var.vm_os_id == "" ? var.vm_os_version : ""
-  }
 
   storage_os_disk {
     name            = "${var.vm_hostname}-osdisk"
