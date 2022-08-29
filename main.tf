@@ -34,7 +34,6 @@ resource "azurerm_virtual_machine" "vm-linux" {
   name                             = "${var.vm_hostname}${count.index}"
   resource_group_name              = data.azurerm_resource_group.vm.name
   location                         = coalesce(var.location, data.azurerm_resource_group.vm.location)
-  availability_set_id              = azurerm_availability_set.vm.id
   vm_size                          = var.vm_size
   network_interface_ids            = [element(azurerm_network_interface.vm.*.id, count.index)]
   delete_os_disk_on_termination    = var.delete_os_disk_on_termination
@@ -230,16 +229,6 @@ resource "azurerm_virtual_machine" "vm-windows" {
     enabled     = var.boot_diagnostics
     storage_uri = var.boot_diagnostics ? join(",", azurerm_storage_account.vm-sa.*.primary_blob_endpoint) : ""
   }
-}
-
-resource "azurerm_availability_set" "vm" {
-  name                         = "${var.vm_hostname}-avset"
-  resource_group_name          = data.azurerm_resource_group.vm.name
-  location                     = coalesce(var.location, data.azurerm_resource_group.vm.location)
-  platform_fault_domain_count  = 2
-  platform_update_domain_count = 2
-  managed                      = true
-  tags                         = var.tags
 }
 
 resource "azurerm_public_ip" "vm" {
