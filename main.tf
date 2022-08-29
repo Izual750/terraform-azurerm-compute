@@ -34,7 +34,6 @@ data "azurerm_platform_image" "osimage" {
   publisher = coalesce(var.vm_os_publisher, module.os.calculated_value_os_publisher)
   offer     = coalesce(var.vm_os_offer, module.os.calculated_value_os_offer)
   sku       = coalesce(var.vm_os_sku, module.os.calculated_value_os_sku)
-  version   = var.vm_os_version
 }
 
 resource "azurerm_virtual_machine" "vm-linux" {

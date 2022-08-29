@@ -109,12 +109,6 @@ variable "vm_os_sku" {
   default     = ""
 }
 
-variable "vm_os_version" {
-  description = "The version of the image that you want to deploy. This is ignored when vm_os_id or vm_os_simple are provided."
-  type        = string
-  default     = "latest"
-}
-
 variable "tags" {
   type        = map(string)
   description = "A map of the tags to use on the resources that are deployed with this module."
