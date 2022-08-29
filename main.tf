@@ -36,6 +36,15 @@ data "azurerm_platform_image" "osimage" {
   sku       = coalesce(var.vm_os_sku, module.os.calculated_value_os_sku)
 }
 
+resource "azurerm_managed_disk" "os-disk" {
+  location             = coalesce(var.location, data.azurerm_resource_group.vm.location)
+  resource_group_name  = data.azurerm_resource_group.vm.name
+  name                 = "${var.vm_hostname}-osdisk"
+  image_reference_id   = data.azurerm_platform_image.osimage.id
+  create_option        = "FromImage"
+  storage_account_type = var.storage_account_type
+}
+
 resource "azurerm_virtual_machine" "vm-linux" {
   count                            = !contains(tolist([var.vm_os_simple, var.vm_os_offer]), "WindowsServer") && !var.is_windows_image ? var.nb_instances : 0
   name                             = var.vm_hostname
@@ -64,6 +73,7 @@ resource "azurerm_virtual_machine" "vm-linux" {
   storage_os_disk {
     name            = "${var.vm_hostname}-osdisk"
     create_option   = "attach"
+    os_type         = "Linux"
     managed_disk_id = azurerm_managed_disk.os-disk.id
   }
 
@@ -136,14 +146,6 @@ resource "azurerm_virtual_machine" "vm-linux" {
   }
 }
 
-resource "azurerm_managed_disk" "os-disk" {
-  location             = coalesce(var.location, data.azurerm_resource_group.vm.location)
-  resource_group_name  = data.azurerm_resource_group.vm.name
-  name                 = "${var.vm_hostname}-osdisk"
-  image_reference_id   = data.azurerm_platform_image.osimage.id
-  create_option        = "FromImage"
-  storage_account_type = var.storage_account_type
-}
 
 resource "azurerm_virtual_machine" "vm-windows" {
   name                          = var.vm_hostname
@@ -173,6 +175,7 @@ resource "azurerm_virtual_machine" "vm-windows" {
   storage_os_disk {
     name            = "${var.vm_hostname}-osdisk"
     create_option   = "attach"
+    os_type         = "Windows"
     managed_disk_id = azurerm_managed_disk.os-disk.id
   }
 
