@@ -15,9 +15,9 @@ resource "azurerm_virtual_machine_data_disk_attachment" "os-disk-attach" {
 }
 
 resource "azurerm_network_interface" "vm-nic" {
-  name                          = "${var.vm_hostname}-nic"
-  resource_group_name           = var.resource_group_name
-  location                      = var.location
+  name                = "${var.vm_hostname}-nic"
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
   ip_configuration {
     name                          = "${var.vm_hostname}-ip"
